@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        span {
+            display: inline-block;
+            padding: 1em;
+        }
+    </style>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Make AJAX call
+            // Create an XML Http Request object
+            // Open the request
+            // Add an event handler for readystatechange
+            // Send the request
+
+            var xhr = new XMLHttpRequest();
+            console.log(xhr.readyState);
+            xhr.addEventListener('readystatechange', function () {
+                if (xhr.readyState === 4) {
+                    if ( xhr.status === 200 ) {
+                        // console.log(xhr.responseText);
+                        var obj = JSON.parse(xhr.responseText);
+                        var hashmap = generateHashMap(obj);
+                        console.log(hashmap);
+                        printDataToPage(hashmap);
+
+                    } else {
+                        console.log('There was an error: ' + xhr.statusText);
+                    }
+                }
+                // xhr.responseText
+            });
+            xhr.open('GET', 'http://uitr.herokuapp.com/countries');
+            xhr.send();
+
+
+            function generateHashMap(obj) {
+                // create a hashmap object based on the data
+                var hashmap = {};
+                for (var i = 0, len = obj.length; i < len; i++) {
+                    var country = obj[i];
+                    if ( typeof hashmap[country.alpha3Code] === 'undefined' ) {
+                        hashmap[country.alpha3Code] = {
+                            name: country.name,
+                            neighbors: country.borders
+                        };
+                    }
+                }
+                return hashmap;
+            }
+
+            function mapCodeToCountry(code, hashmap) {
+                return hashmap[code];
+            }
+
+            function printDataToPage(hashmap) {
+                var ul = document.createElement('ul');
+                for (var code in hashmap) {
+                    var li = document.createElement('li');
+                    var span_country = document.createElement('span');
+                    span_country.innerHTML = hashmap[code].name;
+
+                    var span_borders = document.createElement('span');
+                    span_borders.innerHTML = hashmap[code].neighbors.map(function (element) {
+                        if (hashmap[element]) return hashmap[element].name;
+                        else return undefined;
+                    }).join(', ');
+
+                    console.log(span_borders);
+
+                    li.appendChild(span_country);
+                    li.appendChild(span_borders);
+                    ul.appendChild(li);
+                }
+
+                document.body.innerHTML = '';
+                document.body.appendChild(ul);
+            }
+        });
+
+
+    </script>
+</head>
+<body>
+    <ul>
+        <li>
+            <span>Afghanistan: </span>
+            <span>Iran, Pakistan, </span>
+        </li>
+    </ul>
+</body>
+</html>
